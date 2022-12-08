@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const router = express.Router();
 const user = require('../controllers/user');
 const Auth =  require('../controllers/auth');
@@ -91,5 +92,11 @@ router.get('/forgetpassword',user.forgetPassForm);
 router.post('/forgetpasspin',user.forgetPassPin);
 router.post('/validatepin_fp',user.forgetPassPinValidate);
 router.post('/newpassword_pf',user.setNewPassword)
+
+/*********    CHAT        **********/
+// router.get('/chat',chat.Chat)
+router.get('/chat',(req,res)=>{
+    res.sendFile(path.join(__dirname,'../public/chat.html'))
+})
 
 module.exports = router;
