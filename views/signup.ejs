@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignUp | Form</title>
+    <link rel="stylesheet" href="/styles/signup.css">
+
+</head>
+<body>
+      
+  <div class="container">
+      <div class="left">
+          <div class="header">
+          <h2 class="animation a1">New Here?</h2>
+          <h4 class="animation a2">Provide us with your credentials and enjoy amazing products at a great Price!</h4>
+          </div>
+              <form class="form" method="POST" action="/pinvalidatin">
+                  <input type="email" id="email" name="email" class="form-field animation a3" placeholder="Email" required autocomplete="off">
+                  <input type="text"  id="name" name="name" class="form-field animation a4" placeholder="Full Name" required maxlength="25" autocomplete="off">
+                  <input type="password" name="password" id="password" class="form-field animation a4" placeholder="Password" required maxlength="25" autocomplete="off">
+                  <button type="submit" class="animation a6 signup">SIGNUP</button>    
+              </form>
+            <a href="/signin" class="linker linker-2 animation a4">Already Have An Account?</a>
+
+      </div>
+      <div class="right"></div>   
+  </div>
+
+
+
+
+</body>
+</html>

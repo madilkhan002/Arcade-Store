@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation</title>
+    <!-- Latest compiled and minified CSS -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- Latest compiled JavaScript -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script> -->
+<link rel="stylesheet" href="/styles/validationPin.css">
+</head>
+
+<body>
+<!-- 
+    <form method="post" action="/adduser"> 
+        <div class="mb-3">
+          <label for="ping" class="form-label">PIN : </label>
+          <input type="text" class="form-control" id="pin" name="pin" maxlength="4" required>
+        
+        <button type="submit" class="btn btn-primary">Sign Up</button>
+      </form> -->
+
+  <div class="back">
+    <form method="post" action="/adduser"> 
+        <div class="form">
+            <h1 class="verify-pin-h">Verify PIN</h1>
+            <p>We have sent a confirmation PIN at your given email</p>
+            <p>Kindly Confirm your identity by entering the PIN Below</p>
+            <input type="text" id="pin" name="pin" maxlength="4" required autocomplete="off">
+            <button type="submit" class="btn btn-primary">Verify</button>
+      </form>
+  </div>
+
+
+</body>
+</html>

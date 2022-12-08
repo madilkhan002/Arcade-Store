@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail | Game</title>
+</head>
+<style>
+
+</style>
+<body>
+    <h1>Name : <%= data[0]._name%></h1>
+    <h1>Price : <%= data[0].price%></h1>
+    <h1>Catagory : <%= data[0].catagory%></h1>
+    <h1>Detail : <%= data[0].detail%></h1>
+    <form action="/rating/<%= data[0].id %>" onclick="rating()" method="post">
+            <div class="container">
+                <h1>Rate us</h1>
+                <div class="star">
+                    <input type="radio" name="rate" id="rate-5" value="5">
+                    <label for="rate-5" class="fas fa-star" id="r5" ></label>
+                    <input type="radio" name="rate" id="rate-4" value="4">
+                    <label for="rate-4" class="fas fa-star" id="r4"></label>
+                    <input type="radio" name="rate" id="rate-3" value="3">
+                    <label for="rate-3" class="fas fa-star" id="r3"></label>
+                    <input type="radio" name="rate" id="rate-2" value="2">
+                    <label for="rate-2" class="fas fa-star" id="r2"></label>
+                    <input type="radio" name="rate" id="rate-1" value="1">
+                    <label for="rate-1" class="fas fa-star" id="r1"></label>
+                </div>
+        <!-- <input type="range" name="star_input" id="input-range" class="rate-input" min="0" max="5" value=""> -->
+                <textarea name="feedback" id="" cols="40" rows="5"></textarea>
+                <input type="submit" class="btn btn-secondary" value="Submit">
+        
+            </div>
+        </form>
+
+
+    <a href="/addtowishlist/<%= data[0].id %>">Add to Wishlist</a><br>
+    <a href="/addtocart/<%= data[0].id %>">Add to Cart</a>
+    <script>
+      // function rating (){
+    
+    let data1 = '<%=data[0].stars%>'
+    let total= '<%=data[0].total%>'
+    let data=Math.floor(data1/total);
+    //document.getElementById("rate-5").style.color = "#fd4";
+    if(data=="1"){
+        document.getElementById("r1").style.color = "#fd4";
+        document.getElementById("r2").style.color = "#444";
+        document.getElementById("r3").style.color = "#444";
+        document.getElementById("r4").style.color = "#444";
+        document.getElementById("r5").style.color = "#444";
+    }
+    else if(data=="2"){
+        document.getElementById("r1").style.color = "#fd4";
+        document.getElementById("r2").style.color = "#fd4";
+        document.getElementById("r3").style.color = "#444";
+        document.getElementById("r4").style.color = "#444";
+        document.getElementById("r5").style.color = "#444";
+    }
+    else if(data=="3"){
+        document.getElementById("r1").style.color = "#fd4";
+        document.getElementById("r2").style.color = "#fd4";
+        document.getElementById("r3").style.color = "#fd4";
+        document.getElementById("r4").style.color = "#444";
+        document.getElementById("r5").style.color = "#444";
+    }
+    else if(data=="4"){
+        document.getElementById("r1").style.color = "#fd4";
+        document.getElementById("r2").style.color = "#fd4";
+        document.getElementById("r3").style.color = "#fd4";
+        document.getElementById("r4").style.color = "#fd4";
+        document.getElementById("r5").style.color = "#444";
+    }
+    else if(data=="5"){
+        document.getElementById("r1").style.color = "#fd4";
+        document.getElementById("r2").style.color = "#fd4";
+        document.getElementById("r3").style.color = "#fd4";
+        document.getElementById("r4").style.color = "#fd4";
+        document.getElementById("r5").style.color = "#fd4";
+    }
+    else if(data=="0"){
+        document.getElementById("r1").style.color = "#444";
+        document.getElementById("r2").style.color = "#444";
+        document.getElementById("r3").style.color = "#444";
+        document.getElementById("r4").style.color = "#444";
+        document.getElementById("r5").style.color = "#444";
+    }
+// }
+        function rating (){
+            
+            var r1 = document.getElementById("rate-1").checked;
+            var r2 = document.getElementById("rate-2").checked;
+            var r3 = document.getElementById("rate-3").checked;
+            var r4 = document.getElementById("rate-4").checked;
+            var r5 = document.getElementById("rate-5").checked;
+            document.getElementById("rate-5").style.color = "#fd4";
+            if(r1){
+                document.getElementById("r1").style.color = "#fd4";
+                document.getElementById("r2").style.color = "#444";
+                document.getElementById("r3").style.color = "#444";
+                document.getElementById("r4").style.color = "#444";
+                document.getElementById("r5").style.color = "#444";
+        
+            }
+            else if(r2){
+                document.getElementById("r1").style.color = "#fd4";
+                document.getElementById("r2").style.color = "#fd4";
+                document.getElementById("r3").style.color = "#444";
+                document.getElementById("r4").style.color = "#444";
+                document.getElementById("r5").style.color = "#444";
+            }
+            else if(r3){
+                document.getElementById("r1").style.color = "#fd4";
+                document.getElementById("r2").style.color = "#fd4";
+                document.getElementById("r3").style.color = "#fd4";
+                document.getElementById("r4").style.color = "#444";
+                document.getElementById("r5").style.color = "#444";
+            }
+        
+            else if(r4){
+                document.getElementById("r1").style.color = "#fd4";
+                document.getElementById("r2").style.color = "#fd4";
+                document.getElementById("r3").style.color = "#fd4";
+                document.getElementById("r4").style.color = "#fd4";
+                document.getElementById("r5").style.color = "#444";
+            }
+            else if(r5){
+                document.getElementById("r1").style.color = "#fd4";
+                document.getElementById("r2").style.color = "#fd4";
+                document.getElementById("r3").style.color = "#fd4";
+                document.getElementById("r4").style.color = "#fd4";
+                document.getElementById("r5").style.color = "#fd4";
+        
+            }
+           
+        
+        }
+            </script>
+</body>
+</html>

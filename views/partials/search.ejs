@@ -1,0 +1,38 @@
+<style>
+.d-flex > button{
+    box-shadow: none;
+    color: rgba(231,231,231,0.9);
+}
+
+.d-flex button:active,
+.d-flex button:focus{
+    background-color: black;
+    color: white;
+    box-shadow: none;
+}
+
+</style>
+    
+    <div class="catalog-search">
+        <form class="d-flex" action="/<%= path %>" method="POST">
+            <input class="form-control me-2" name="search" type="search" placeholder="Search" aria-label="Search" required>
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form> 
+    </div>
+
+
+<div class="left-filters">
+
+    <div class="dropdown genre-filter">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Genre
+        </button>
+                    
+        <div class="dropdown-menu genre-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item menu-item" role="button" href="/<%=path%>/Shooting/1">Shooting</a>
+            <a class="dropdown-item menu-item" role="button" href="/<%=path%>/Arcade/1">Arcade</a>
+            <a class="dropdown-item menu-item" role="button" href="/<%=path%>/Adventure/1">Adventure</a>
+        </div>
+    </div>
+
+</div>

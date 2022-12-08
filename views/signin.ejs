@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/signup.css">
+    <title>Log In</title>
+    
+</head>
+<body>
+    
+<div class="container">
+    <div class="left">
+        <div class="header">
+          <h2 class="animation a1">Welcome Back</h2>
+          <h4 class="animation a2">Log in to your account using email and password</h4>
+        </div>
+          <form class="form" action="/adminPanel" method="post">
+
+              <input type="email" class="form-field animation a3" placeholder="Email" name="email" id="email" required autocomplete="off">
+              <input type="password" class="form-field animation a4" placeholder="Password" name="pass" id="pass" required autocomplete="off">
+              
+              <p class="animation a5"><a href="#" class="paras">Forgot Password</a></p>
+
+              <label for="user" class="radio-label animation a5">&nbsp;&nbsp;&nbsp; User: 
+                <input class="check-input animation a5" type="radio" name="role" id="user" value="user" checked>
+              </label>
+              
+              <label for="admin" class="radio-label animation a5">Admin:
+                <input class="check-input animation a5" type="radio" name="role" value="admin" id="admin">
+              </label>
+
+              <button class="animation a6 login">LOGIN</button>
+
+          </form>
+
+            <a href="/signup" class="linker linker-2 animation a4">Create New Account?</a>
+    </div>
+    
+  <div class="right"></div>   
+</div>
+
+
+<script>
+
+</script>
+
+</body>
+</html>
