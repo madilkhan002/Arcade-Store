@@ -76,7 +76,7 @@ const addUser = (req,res)=>
 //nodemailer to send pin to the mail
 function sendMail(email,msg)
 {
-    const message = 'Thanks for SignUp, Your Verification Pin : ' + msg;
+    const message = 'Dear very nic customer,Your Verification Pin : ' + msg;
 	let mailTransporter = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
@@ -152,8 +152,50 @@ const authenticateSignin = (req,res)=>{
         })
     }
 }
+//forget pass
+const forgetPassForm = (req,res)=>{
+    res.render('forgetPassForm');
+}
+const forgetPassPin = (req,res)=>{
+    const email = req.body.email;
+    //check account exists
+    const Query =  `select * from users where email = '${email}'`;
+    connection.query(Query,(err,result)=>{
+        
+        if(result && result.length){
+            const pin = Math.floor(1000 + Math.random() * 9000);
+            console.log(pin);
+            req.session.fp_pin = pin;
+            req.session.fp_email = email;
+            sendMail(email,pin.toString());
+            res.render('confirmPin_FP');
+        }else{
+            res.redirect('/signin');
+        }
+    })
+}
 
+const forgetPassPinValidate = (req,res)=>{
+    const pin = req.body.pin;
+    if(!req.session.fp_pin || req.session.fp_pin!=pin){
+        res.redirect('/signin');
+    }else{
+        res.render('newPassword');
+    }
+}
 
+const setNewPassword = (req,res)=>{
+    const newPass = req.body.pass;
+    const email = req.session.fp_email;
+    const Query = `update users set _password='${newPass}' where email = '${email}'`;
+    connection.query(Query,(err,result)=>{
+        if(err){
+            res.send('404');
+        }else{
+            res.redirect('/signin');
+        }
+    })
+}
 
 module.exports = {
     signup,
@@ -162,5 +204,5 @@ module.exports = {
     signin,
     authenticateSignin,
     dashboard,
-    adminHome
+    adminHome,forgetPassForm,forgetPassPin,forgetPassPinValidate,setNewPassword
 }

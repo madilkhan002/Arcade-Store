@@ -85,5 +85,11 @@ router.post('/proceedbill/:id',buygame.proceedBill); // proceed towards the bill
 
 router.get('/admindashboard',Auth.auth,adminDashboard.report);
 
+/**********     FORGET PASSWORD          ******* */
+
+router.get('/forgetpassword',user.forgetPassForm);
+router.post('/forgetpasspin',user.forgetPassPin);
+router.post('/validatepin_fp',user.forgetPassPinValidate);
+router.post('/newpassword_pf',user.setNewPassword)
 
 module.exports = router;
