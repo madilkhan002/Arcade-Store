@@ -2,10 +2,8 @@ const express = require('express');
 const connection = require('../config/sqlConnection');
 const app = express();
 const path = require ('path');
-const { parse } = require('path');
 const XMLHttpRequest = require('xhr2');
-const { json } = require('body-parser');
-const { isTypedArray, isKeyObject } = require('util/types');
+
 
 const gamesPerPage = 6;
 
@@ -163,12 +161,11 @@ const rating=(req,res)=>{
 
      const id = parseInt(req.params.id);
   
-    let x,y;
+     let x;
      const Query1 =  `select stars from games where id = '${id}'`;
     
      connection.query(Query1,(err,result1)=>{
         x=result1[0].stars;
-        console.log('value of x in table',x);
 
         const Query2 =  `update games set stars='${rate+x}' where id = '${id}'`;
         connection.query(Query2,(err,result2)=>{
@@ -176,25 +173,15 @@ const rating=(req,res)=>{
         const Query3=`Update games set total=total+1 where id='${id}'`;
             
       connection.query(Query3,(err,result3)=>{
-          if(err)
-          {
-              console.log('SQL ERROR WHILE UPDATION');
-              res.send('404 ERROR');
-          }
-          else
+            if(err)
+            {
+                console.log('SQL ERROR WHILE UPDATION');
+                res.send('404 ERROR');
+            }
+            else
             {
                 res.redirect('/viewgamesuser');
-            }
-      })
-           
-   
-   
-            })
-
-
-         })
-
-         
+            }})})})
      }
 module.exports = {comment, homePage,viewGames_pager,viewGviewGames_catagory_page,searchGame,details,rating};
 

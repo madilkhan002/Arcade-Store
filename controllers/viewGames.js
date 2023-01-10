@@ -2,10 +2,8 @@ const express = require('express');
 const connection = require('../config/sqlConnection');
 const app = express();
 const path = require ('path');
-const { parse } = require('path');
 const XMLHttpRequest = require('xhr2');
-const { json } = require('body-parser');
-const { isTypedArray, isKeyObject } = require('util/types');
+
 
 const gamesPerPage = 6;
 
