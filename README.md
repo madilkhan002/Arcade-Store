@@ -28,41 +28,6 @@ These are the softwares you need to install before getting started.
 - NPM
 - MySQL
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Arcade | Installation
-
-1. Clone This Repository
-
-   ```sh
-   https://github.com/madilkhan002/arcade-store.git
-2. Install NPM Packages
-   ```sh
-   npm install 
-3. Enter Your DataBase Credentials in `config/sequelize.js`
-   ```js
-   const sequelize = new Sequelize(
-    'DataBase_Name',
-    'UserName',
-    'Password',
-    {
-        host: 'HostName',
-        dialect: 'mysql'
-    });
-    
-4. Enter Your Email Credentials in `config/transporter.js`
-   ```js
-    let transporter = nodemailer.createTransport({
-    host: "smtp.gmail.email",
-    service: "gmail",
-    auth: {
-      user: "Your_Email",
-      pass: "App_Password",
-    }
-    });
-    
-5. Get Started With The Command
-   ```sh
    node index.js 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 ## Arcade | Contributing
