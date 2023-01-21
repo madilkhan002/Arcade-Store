@@ -39,32 +39,6 @@ These are the softwares you need to install before getting started.
 2. Install NPM Packages
    ```sh
    npm install 
-3. Enter Your DataBase Credentials in `config/sequelize.js`
-   ```js
-   const sequelize = new Sequelize(
-    'DataBase_Name',
-    'UserName',
-    'Password',
-    {
-        host: 'HostName',
-        dialect: 'mysql'
-    });
-    
-4. Enter Your Email Credentials in `config/transporter.js`
-   ```js
-    let transporter = nodemailer.createTransport({
-    host: "smtp.gmail.email",
-    service: "gmail",
-    auth: {
-      user: "Your_Email",
-      pass: "App_Password",
-    }
-    });
-    
-5. Get Started With The Command
-   ```sh
-   node index.js 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 ## Arcade | Contributing
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
