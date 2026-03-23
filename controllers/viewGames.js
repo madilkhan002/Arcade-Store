@@ -1,5 +1,6 @@
 const express = require('express');
-const connection = require('../config/sqlConnection');
+const { Game, Comment } = require('../models');
+const { Op } = require('sequelize');
 const app = express();
 const path = require ('path');
 const XMLHttpRequest = require('xhr2');
@@ -7,137 +8,98 @@ const XMLHttpRequest = require('xhr2');
 
 const gamesPerPage = 6;
 
-const homePage = (req,res)=>{
-    let totalGames = 0;
-    connection.query('select count(*) as COUNT from games',(err,data)=>{
-        if(err) res.send('404 Error');
-        totalGames = data[0].COUNT;
-    })
-
-    const Query =  `select * from games LIMIT 0 , 6`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,0,totalGames,1,"null");
-        }
-    })
+const homePage = async (req,res)=>{
+    try {
+        const totalGames = await Game.count();
+        const games = await Game.findAll({ limit: 6, offset: 0, raw: true });
+        showData(games,res,req,0,totalGames,1,"null");
+    } catch(err) {
+        res.send('404 Error');
+    }
 }
 
-const viewGames_pager = (req,res)=>{
-    //getting data about the filter & search
-
-    //get the total games
-    let totalGames = 0;
-    connection.query('select count(*) as COUNT from games',(err,data)=>{
-        if(err) res.send('404 Error');
-        totalGames = data[0].COUNT;
-    })
-    const currPage = parseInt(req.params.page);
-    const page = parseInt(req.params.page - 1) * 6;
-    const Query =  `select * from games LIMIT ${page}, 6`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,0,totalGames,currPage,"null");
-        }
-    })    
+const viewGames_pager = async (req,res)=>{
+    try {
+        const totalGames = await Game.count();
+        const currPage = parseInt(req.params.page);
+        const offset = (currPage - 1) * 6;
+        const games = await Game.findAll({ limit: 6, offset: offset, raw: true });
+        showData(games,res,req,0,totalGames,currPage,"null");
+    } catch(err) {
+        res.send('404 Error');
+    }
 }
 
-const viewGviewGames_catagory_page = (req,res)=>{
-    //getting data about the filter & search
-    //get the total games
-    let totalGames = 0;
+const viewGviewGames_catagory_page = async (req,res)=>{
     const currPage = parseInt(req.params.page);
-    const page = parseInt(req.params.page - 1) * 3;
+    const offset = (currPage - 1) * 3;
     const catagory = req.params.catagory;
 
-    connection.query(`select count(*) as COUNT from games where catagory = '${catagory}'`,(err,data)=>{
-        if(err) res.send('404 Error');
-        totalGames = data[0].COUNT;
-    })
-
-
-    const Query =  `select * from games where catagory = '${catagory}' LIMIT ${page},${6}`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,0,totalGames,currPage,catagory);
-        }
-    })
+    try {
+        const totalGames = await Game.count({ where: { catagory } });
+        const games = await Game.findAll({ where: { catagory }, limit: 6, offset: offset, raw: true });
+        showData(games,res,req,0,totalGames,currPage,catagory);
+    } catch(err) {
+        res.send('404 Error');
+    }
 }
 
-const searchGame = (req,res)=>{
+const searchGame = async (req,res)=>{
     const search = req.body.search;
-    const Query =  `select * from games where _name LIKE '%${search}%'`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,1,0,0,0,"null");
-        }
-    })
+    try {
+        const games = await Game.findAll({
+            where: {
+                _name: {
+                    [Op.like]: `%${search}%`
+                }
+            },
+            raw: true
+        });
+        showData(games,res,req,1,0,0,0,"null");
+    } catch(err) {
+        res.send('404 Error');
+    }
 }
 
-const details = (req,res) =>{
+const details = async (req,res) =>{
     const id = parseInt(req.params.id);
-    const query = `Select * from games where id = ${id}`;
-    connection.query(query, (err,result)=>{
-        if (err){
-            res.send ('error from 400 to 500');
+    try {
+        const game = await Game.findAll({ where: { id }, raw: true });
+        if(!game || game.length === 0) {
+            return res.send ('error from 400 to 500');
         }
-        else {
-            const id = req.params.id;
-            const url = "https://store.steampowered.com/api/appdetails?appids="+id;
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", url);
 
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                const id2 = req.params.id;
+        const url = "https://store.steampowered.com/api/appdetails?appids="+id;
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", url);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
                 xhr.responseText = xhr.responseText.replace(/<\/?([a-z][a-z0-9]*)\b[^>]*>/gi, '');
                 const gameData = JSON.parse(xhr.responseText);
-                // console.log(gameData);
-                // res.send(gameData[`${id}`]["data"]);
                 const steamData = gameData[`${id}`];
-                // res.send(steamData["data"]["reviews"])
-                res.render('gameDetails', {data: result, steam: steamData});
-                }
-            };
-            xhr.send();
-        }
-    })
+                res.render('gameDetails', {data: game, steam: steamData});
+            }
+        };
+        xhr.send();
+    } catch(err) {
+        res.send('error from 400 to 500');
+    }
 }
 
-const comment = (req,res) => {
+const comment = async (req,res) => {
     const gid = req.params.id;
     const com = req.body.comment;
 
-    let totalcomms = 1;
-    connection.query('select count(*) as COUNT from comments',(err,data)=>{
-        if(err) res.send('404 Error');
-        totalcomms = data[0].COUNT;
-    })
-
-    const q = `insert into comments values (${totalcomms}, '${gid}',' ${com}')`;
-    connection.query(q,(err,result) => {
-        if (err){
-            res.send(err);
-        }
-        else{
-            res.send('comment inserted');
-        }
-    })
+    try {
+        await Comment.create({
+            gameid: gid,
+            comm: com
+        });
+        res.send('comment inserted');
+    } catch(err) {
+        res.send(err);
+    }
 }
 
 //function to show the data

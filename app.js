@@ -13,6 +13,24 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 8000;
 
+// Database models and sync
+const { connection, Admin } = require('./models');
+connection.sync() // syncs tables
+  .then(async () => {
+    console.log('Sequelize synchronized database!');
+    // Seed default admin if missing
+    try {
+      await Admin.findOrCreate({
+        where: { email: 'admin@admin.com' },
+        defaults: { _password: 'admin' }
+      });
+    } catch(err) {
+      console.error('Failed to seed admin', err);
+    }
+  })
+  .catch(err => console.error('Sequelize sync error:', err));
+
+
 app.use(cookieParser());
 
 app.use(
@@ -32,10 +50,14 @@ app.set('view engine','ejs');
 app.use(experss.static('public'));
 app.use('/',router);
 
-server.listen(PORT,err => console.log(`Listening to ${PORT} port`));
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, err => console.log(`Listening to ${PORT} port`));
+}
 
 io.on('connection', (socket) => {
     socket.on('chat message', (msg) => {
       io.emit('chat message', msg);
     });
   });
+
+module.exports = app;

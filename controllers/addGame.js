@@ -1,4 +1,4 @@
-const connection = require('../config/sqlConnection')
+const { Game } = require('../models')
 const multer = require('multer');
 const path = require('path');
 const notifier = require('node-notifier');
@@ -43,43 +43,21 @@ const addGame = (req,res)=>{
                 res.redirect('/addgameform');
                 return;
             }
-            //getting the id of next game
-            // query to get last product id
-            const Query1 = 'SELECT id FROM games ORDER BY id DESC LIMIT 1'
-            connection.query(Query1,(err,result)=>{
-                if(result.length)
-                {
-                    const Query = `INSERT INTO games(id,_name,price,detail,catagory) VALUES(${id},"${name}","${price}","${detail}","${catagory}")`;
-                    connection.query(Query,(err,result)=>
-                    {
-                        if(err)
-                        {
-                            console.log('SQL INSERTION ERROR1');
-                            res.send(err.toString());
-                        }else
-                        {
-                            notifier.notify(name + ' Added Successfully');
-                            res.redirect('/viewgames');
-                        }
-                    })
-                }
-                else
-                {
-                    const Query = `INSERT INTO games VALUES(${id},'${name}','${price}','${detail}','${catagory}')`;
-                    connection.query(Query, (err,result)=>
-                    {
-                        if(err)
-                        {
-                            console.log('SQL INSERTION ERROR2');
-                            res.send(err.toString());
-                        }else
-                        {
-                            notifier.notify(name + ' Added Successfully');
-                            res.redirect('/viewgames');
-                        }
-                    })
-                }
+            Game.create({
+                id: id,
+                _name: name,
+                price: price,
+                detail: detail,
+                catagory: catagory
             })
+            .then(() => {
+                notifier.notify(name + ' Added Successfully');
+                res.redirect('/viewgames');
+            })
+            .catch(err => {
+                console.log('SQL INSERTION ERROR', err);
+                res.send(err.toString());
+            });
 
         }
     });

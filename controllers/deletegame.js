@@ -1,96 +1,66 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const connection = require('../config/sqlConnection');
+const { Game } = require('../models');
+const { Op } = require('sequelize');
 const app = express();
 
 const gamesPerPage = 3;
 
-const homePage = (req,res)=>{
+const homePage = async (req,res)=>{
     //getting data about the filter & search
-    let totalGames = 0;
-    connection.query('select count(*) as COUNT from games',(err,data)=>{
-        if(err) res.send('404 Error');
-        totalGames = data[0].COUNT;
-    })
-
-    const Query =  `select * from games LIMIT 0,3`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,0,totalGames,1,"null");
-        }
-    })
-    
+    try {
+        const totalGames = await Game.count();
+        const games = await Game.findAll({ limit: 3, offset: 0, raw: true });
+        showData(games,res,req,0,totalGames,1,"null");
+    } catch (err) {
+        res.send('404 Error');
+    }
 }
 
-const delete_pager = (req,res)=>{
-    //getting data about the filter & search
-
-    //get the total games
-    let totalGames = 0;
-    connection.query('select count(*) as COUNT from games',(err,data)=>{
-        if(err) res.send('404 Error');
-        totalGames = data[0].COUNT;
-    })
-    const currPage = parseInt(req.params.page);
-    const page = parseInt(req.params.page - 1) * 3;
-    const Query =  `select * from games LIMIT ${page},3`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,0,totalGames,currPage,"null");
-        }
-    })    
+const delete_pager = async (req,res)=>{
+    try {
+        const totalGames = await Game.count();
+        const currPage = parseInt(req.params.page);
+        const offset = (currPage - 1) * 3;
+        const games = await Game.findAll({ limit: 3, offset: offset, raw: true });
+        showData(games,res,req,0,totalGames,currPage,"null");
+    } catch (err) {
+        res.send('404 Error');
+    }
 }
 
-const deleteGames_catagory_page = (req,res)=>{
-    //getting data about the filter & search
-    //get the total games
-    let totalGames = 0;
+const deleteGames_catagory_page = async (req,res)=>{
     const currPage = parseInt(req.params.page);
-    const page = parseInt(req.params.page - 1) * 3;
+    const offset = (currPage - 1) * 3;
     const catagory = req.params.catagory;
 
-    connection.query(`select count(*) as COUNT from games where catagory = '${catagory}'`,(err,data)=>{
-        if(err) res.send('404 Error');
-        totalGames = data[0].COUNT;
-    })
-
-
-    const Query =  `select * from games where catagory = '${catagory}' LIMIT ${page},${3}`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,0,totalGames,currPage,catagory);
-        }
-    })
+    try {
+        const totalGames = await Game.count({ where: { catagory } });
+        const games = await Game.findAll({ where: { catagory }, limit: 3, offset: offset, raw: true });
+        showData(games,res,req,0,totalGames,currPage,catagory);
+    } catch (err) {
+        res.send('404 Error');
+    }
 }
 
 //search
-const searchGame = (req,res)=>{
+const searchGame = async (req,res)=>{
     const search = req.body.search;
 
-    const Query =  `select * from games where _name LIKE '%${search}%'`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }
-        else
-        {
-            showData(result,res,req,1,0,0,0,"null");
-        }
-    })
+    try {
+        const games = await Game.findAll({
+            where: {
+                _name: {
+                    [Op.like]: `%${search}%`
+                }
+            },
+            raw: true
+        });
+        showData(games,res,req,1,0,0,0,"null");
+    } catch (err) {
+        res.send('404 Error');
+    }
 }
 
 
@@ -102,23 +72,20 @@ function showData(result,res,req,search,totalGames,page,Catagory)
 
 
 //Delete from the database
-const deleteGame = (req,res)=>{
+const deleteGame = async (req,res)=>{
     const id = req.params.id;
-    const Query =  `delete from games where id = '${id}'`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            console.log('ERROR AT DELETION OF GAME');
-            res.send('404 ERROR');
-        }
-        else
-        {
-            console.log("Number of records Deleted: " + result.affectedRows);
-            const PATH = path.resolve('public/images/') +"/"+ id.toString()+ '.jpeg';
+    try {
+        const deleted = await Game.destroy({ where: { id } });
+        console.log("Number of records Deleted: " + deleted);
+        const PATH = path.resolve('public/images/') +"/"+ id.toString()+ '.jpeg';
+        if(fs.existsSync(PATH)) {
             fs.unlinkSync(PATH);
-            res.redirect('/deletegame')
         }
-    })
+        res.redirect('/deletegame');
+    } catch (err) {
+        console.log('ERROR AT DELETION OF GAME');
+        res.send('404 ERROR');
+    }
 }
 
 module.exports = {homePage,delete_pager,deleteGames_catagory_page,deleteGame,searchGame};

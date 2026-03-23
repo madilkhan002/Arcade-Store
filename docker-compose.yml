@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=sql-db
+      - DB_USER=root
+      - DB_PASS=rootpassword
+      - DB_NAME=arcade_db
+    depends_on:
+      - sql-db
+    volumes:
+      - ./public/images:/app/public/images
+    restart: unless-stopped
+
+  sql-db:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=arcade_db
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+  db_data:

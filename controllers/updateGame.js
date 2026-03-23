@@ -1,77 +1,45 @@
 const express = require('express');
 const path = require('path');
-const connection = require('../config/sqlConnection');
+const { Game } = require('../models');
+const { Op } = require('sequelize');
 const multer = require('multer');
 
 const gamesPerPage = 3;
 
-const homePage = (req,res)=>{
-    //getting data about the filter & search
-    let totalGames = 0;
-    connection.query('select count(*) as COUNT from games',(err,data)=>{
-        if(err) res.send('404 Error');
-        totalGames = data[0].COUNT;
-    })
-
-    const Query =  `select * from games LIMIT 0,3`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,0,totalGames,1,"null");
-        }
-    })
+const homePage = async (req,res)=>{
+    try {
+        const totalGames = await Game.count();
+        const games = await Game.findAll({ limit: 3, offset: 0, raw: true });
+        showData(games,res,req,0,totalGames,1,"null");
+    } catch (err) {
+        res.send('404 Error');
+    }
 }
 
-const update_pager = (req,res)=>{
-    //getting data about the filter & search
-
-    //get the total games
-    let totalGames = 0;
-    connection.query('select count(*) as COUNT from games',(err,data)=>{
-        if(err) res.send('404 Error');
-        totalGames = data[0].COUNT;
-    })
-    const currPage = parseInt(req.params.page);
-    const page = parseInt(req.params.page - 1) * 3;
-    const Query =  `select * from games LIMIT ${page},3`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,0,totalGames,currPage,"null");
-        }
-    })    
+const update_pager = async (req,res)=>{
+    try {
+        const totalGames = await Game.count();
+        const currPage = parseInt(req.params.page);
+        const offset = (currPage - 1) * 3;
+        const games = await Game.findAll({ limit: 3, offset: offset, raw: true });
+        showData(games,res,req,0,totalGames,currPage,"null");
+    } catch (err) {
+        res.send('404 Error');
+    }
 }
 
-const update_pager_catagory_page = (req,res)=>{
-    //getting data about the filter & search
-    //get the total games
-    let totalGames = 0;
+const update_pager_catagory_page = async (req,res)=>{
     const currPage = parseInt(req.params.page);
-    const page = parseInt(req.params.page - 1) * 3;
+    const offset = (currPage - 1) * 3;
     const catagory = req.params.catagory;
 
-    connection.query(`select count(*) as COUNT from games where catagory = '${catagory}'`,(err,data)=>{
-        if(err) res.send('404 Error');
-        totalGames = data[0].COUNT;
-    })
-
-
-    const Query =  `select * from games where catagory = '${catagory}' LIMIT ${page},${3}`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,0,totalGames,currPage,catagory);
-        }
-    })
+    try {
+        const totalGames = await Game.count({ where: { catagory } });
+        const games = await Game.findAll({ where: { catagory }, limit: 3, offset: offset, raw: true });
+        showData(games,res,req,0,totalGames,currPage,catagory);
+    } catch (err) {
+        res.send('404 Error');
+    }
 }
 
 //function to show the data
@@ -81,18 +49,14 @@ function showData(result,res,req,search,totalGames,page,Catagory)
 }
 
 //update game form
-const updateGameForm = (req,res)=>{
+const updateGameForm = async (req,res)=>{
     const id =  req.params.id;
-    const Query = `select * from games where id = '${id}'`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send(err.toString());
-        }else
-        {
-            res.render('updateGameForm',{data:result});
-        }
-    })
+    try {
+        const game = await Game.findAll({ where: { id }, raw: true });
+        res.render('updateGameForm',{data:game});
+    } catch(err) {
+        res.send(err.toString());
+    }
 }
 
 
@@ -114,7 +78,7 @@ const upload = multer({
 //update game in the database
 const updateGame = (req,res)=>{
 
-    upload(req,res,(err)=>{
+    upload(req,res,async (err)=>{
         if(err)
         {
             res.send(err.toString());
@@ -127,19 +91,19 @@ const updateGame = (req,res)=>{
             const detail = req.body.detail;
             const catagory = req.body.catagory;
 
-            const Query = `UPDATE games set _name = '${name}', price = '${price}' , detail = '${detail}' , catagory = '${catagory}' where id = ${id}`;
-            connection.query(Query,(err,result)=>{
-                if(err)
-                {
-                    console.log('SQL ERROR WHILE UPDATION');
-                    res.send('404 ERROR');
-                }
-                else
-                {
-                    console.log('GAME UPDATED SUCCESSFULLY');
-                    res.redirect('/updategame');
-                }
-            })
+            try {
+                await Game.update({
+                    _name: name,
+                    price: price,
+                    detail: detail,
+                    catagory: catagory
+                }, { where: { id } });
+                console.log('GAME UPDATED SUCCESSFULLY');
+                res.redirect('/updategame');
+            } catch(error) {
+                console.log('SQL ERROR WHILE UPDATION');
+                res.send('404 ERROR');
+            }
         }
 
     })
@@ -147,18 +111,21 @@ const updateGame = (req,res)=>{
 }
 
 //seach game
-const searchGame = (req,res)=>{
+const searchGame = async (req,res)=>{
     const search = req.body.search;
-    const Query =  `select * from games where _name LIKE '%${search}%'`;
-    connection.query(Query,(err,result)=>{
-        if(err)
-        {
-            res.send('404 Error');
-        }else
-        {
-            showData(result,res,req,1,0,0,0,"null");
-        }
-    })
+    try {
+        const games = await Game.findAll({
+            where: {
+                _name: {
+                    [Op.like]: `%${search}%`
+                }
+            },
+            raw: true
+        });
+        showData(games,res,req,1,0,0,0,"null");
+    } catch(err) {
+        res.send('404 Error');
+    }
 }
 
 

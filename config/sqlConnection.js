@@ -1,27 +1,31 @@
-const mysql = require("mysql");
+const { Sequelize } = require('sequelize');
 
-const connection = mysql.createConnection({
-    // host:'sql6.freemysqlhosting.net',
-    // user:'sql6583283',
-    // password:'gTGQA5gwAV',
-    // database:'sql6583283',
-    // port: "3306"
-    host:'127.0.0.1',
-    user:'root',
-    password:'',
-    database:'testdb1'
-});
+let connection;
 
-connection.connect((err)=>{
-    if(err)
+if (process.env.NODE_ENV === 'test') {
+  connection = new Sequelize('sqlite::memory:', {
+    logging: false
+  });
+} else {
+  connection = new Sequelize(
+    process.env.DB_NAME || 'testdb1',
+    process.env.DB_USER || 'root',
+    process.env.DB_PASS || '',
     {
-        console.log("Database Connection Failed!");
-        console.log(err);
+      host: process.env.DB_HOST || '127.0.0.1',
+      dialect: 'mysql',
+      logging: false, // Set to true to see SQL queries in console
     }
-    else
-    {
-        console.log("Database Connected!");
-    }
-});
+  );
+}
+
+connection.authenticate()
+  .then(() => {
+    console.log('Database Connected via Sequelize!');
+  })
+  .catch((err) => {
+    console.log('Database Connection Failed!');
+    console.error(err);
+  });
 
 module.exports = connection;

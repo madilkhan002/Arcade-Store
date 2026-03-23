@@ -1,6 +1,6 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
-const connection = require("../config/sqlConnection");
+const { User, Admin } = require("../models");
 
 const app = express();
 //rendering the signup page
@@ -10,21 +10,16 @@ const signup = (req,res)=>{
 
 
 //pin validation function
-const pinValidation = (req,res)=>{
+const pinValidation = async (req,res)=>{
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
 
-    //check if user already exits or not
-    const Query =  `select * from users where email = '${email}'`;
-    connection.query(Query,(err,result)=>
-    {
-        if(result && result.length)
-        {   
+    try {
+        const user = await User.findOne({ where: { email } });
+        if(user) {
             return res.send('<h1>USER ALREADY EXISTS</h1>');
-        }else
-        {
-            //record not exists
+        } else {
             const data = {name : name,email : email,password : password};    
             const pin = Math.floor(1000 + Math.random() * 9000);
             console.log(pin);
@@ -33,7 +28,9 @@ const pinValidation = (req,res)=>{
             req.session.pin = pin;
             res.render('confirmPin');
         }
-    })
+    } catch (err) {
+        res.send('404 Error');
+    }
 }
 
 const dashboard = (req,res) => {
@@ -41,7 +38,7 @@ const dashboard = (req,res) => {
 }
 
 //confirm the pin and add new user
-const addUser = (req,res)=>
+const addUser = async (req,res)=>
 {
     const Data  = req.session.data
     const pin  = req.session.pin
@@ -52,18 +49,17 @@ const addUser = (req,res)=>
     //verify the pin
     if(pin ==  userPin)
     {
-        const Query = `INSERT INTO users VALUES('${Data.email}','${Data.name}','${Data.password}')`;
-        connection.query(Query,(err,result)=>{
-            if(err)
-            {
-                console.log('SQL INSERTION ERROR');
-                // console.log(err);
-                res.send('404 ERROR')
-            }else
-            {
-                res.redirect('/signin');
-            }
-        })
+        try {
+            await User.create({
+                email: Data.email,
+                name: Data.name,
+                _password: Data.password
+            });
+            res.redirect('/signin');
+        } catch(err) {
+            console.log('SQL INSERTION ERROR', err);
+            res.send('404 ERROR');
+        }
     }else
     {
         res.send('<h1>PIN NOT MATCHED</h1>');
@@ -113,56 +109,47 @@ const adminHome = (req,res)=>{
 
 
 //authenticate the data when user sign in 
-const authenticateSignin = (req,res)=>{
+const authenticateSignin = async (req,res)=>{
     const email = req.body.email;
     const password =  req.body.pass;
     const role = req.body.role.toString();
-    //identify the role
-    if(role == 'admin')
-    {
-        //match the data with the admin
-        const Query = `SELECT * FROM admins where email='${email}' AND _password='${password}'`;
-        connection.query(Query,(err,result)=>{
-            if(result && result.length)
-            {
+
+    try {
+        if(role == 'admin')
+        {
+            const admin = await Admin.findOne({ where: { email, _password: password } });
+            if(admin) {
                 req.session.role = role;
                 req.session.email = email;
                 res.redirect('/adminPanel');
-            }else
-            {
+            } else {
                 res.redirect('/signin');
             }
-            
-        })
-    }
-    else
-    {
-        //match the data with the users table in DB
-        const Query = `SELECT * FROM users where email='${email}' AND _password='${password}'`;
-        connection.query(Query,(err,result)=>{
-            if(result && result.length)
-            {
+        }
+        else
+        {
+            const user = await User.findOne({ where: { email, _password: password } });
+            if(user) {
                 req.session.role = role;
                 req.session.email = email;
                 res.redirect('/home');
-            }else
-            {
+            } else {
                 res.redirect('/signin');
             }
-        })
+        }
+    } catch(err) {
+        res.redirect('/signin');
     }
 }
 //forget pass
 const forgetPassForm = (req,res)=>{
     res.render('forgetPassForm');
 }
-const forgetPassPin = (req,res)=>{
+const forgetPassPin = async (req,res)=>{
     const email = req.body.email;
-    //check account exists
-    const Query =  `select * from users where email = '${email}'`;
-    connection.query(Query,(err,result)=>{
-        
-        if(result && result.length){
+    try {
+        const user = await User.findOne({ where: { email } });
+        if(user){
             const pin = Math.floor(1000 + Math.random() * 9000);
             console.log(pin);
             req.session.fp_pin = pin;
@@ -172,7 +159,9 @@ const forgetPassPin = (req,res)=>{
         }else{
             res.redirect('/signin');
         }
-    })
+    } catch(err) {
+        res.redirect('/signin');
+    }
 }
 
 const forgetPassPinValidate = (req,res)=>{
@@ -184,17 +173,15 @@ const forgetPassPinValidate = (req,res)=>{
     }
 }
 
-const setNewPassword = (req,res)=>{
+const setNewPassword = async (req,res)=>{
     const newPass = req.body.pass;
     const email = req.session.fp_email;
-    const Query = `update users set _password='${newPass}' where email = '${email}'`;
-    connection.query(Query,(err,result)=>{
-        if(err){
-            res.send('404');
-        }else{
-            res.redirect('/signin');
-        }
-    })
+    try {
+        await User.update({ _password: newPass }, { where: { email } });
+        res.redirect('/signin');
+    } catch(err) {
+        res.send('404');
+    }
 }
 
 module.exports = {
